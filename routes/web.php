@@ -16,11 +16,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-
 Route::get('/', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -28,13 +28,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
+    Route::get('/documents/download/{id}', [DocumentController::class, 'download'])->name('documents.download');
+    Route::post('/documents/upload', [DocumentController::class, 'upload'])->name('documents.upload');
+    Route::get('/documents/{id}/edit', [DocumentController::class, 'edit'])->name('documents.edit');
+    Route::put('/documents/{id}', [DocumentController::class, 'update'])->name('documents.update');
+    Route::delete('/documents/{id}', [DocumentController::class, 'destroy'])->name('documents.destroy');
 });
 
-
-Route::get('/documents', [DocumentController::class,'index'])->name('documents.index');
-Route::post('/documents/upload', [DocumentController::class,'upload'])->name('documents.upload');
-Route::get('/documents/{id}/edit', [DocumentController::class,'edit'])->name('documents.edit');
-Route::put('/documents/{id}', [DocumentController::class,'update'])->name('documents.update');
-Route::delete('/documents/{id}', [DocumentController::class,'destroy'])->name('documents.destroy');
-
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
