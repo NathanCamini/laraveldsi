@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Documents;
+use App\Models\Permissions;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
@@ -32,9 +33,10 @@ class DocumentController extends Controller
             $documents = Documents::all();
         }
 
-        $users = User::All();
+        $users = User::All();;
+        $userAtual = Auth::user()->id;
 
-        return view('documents', compact('documents','users'));
+        return view('documents', compact('documents','users', 'userAtual'));
     }
 
     public function upload(Request $request)
@@ -44,17 +46,23 @@ class DocumentController extends Controller
         ]);
 
         $arquivo = $request->file('arquivo');
-        $nomeArquivo = $arquivo->getClientOriginalName();
+        $extension = $arquivo->getClientOriginalExtension();
+        $nomeArquivoOriginal = $arquivo->getClientOriginalName();
+        $nomeArquivo = time() . '.' . $nomeArquivoOriginal;
         $arquivo->move(public_path('uploads'), $nomeArquivo);
 
         $documento = new Documents;
-        $documento->name = $nomeArquivo;
+        $documento->name = $nomeArquivoOriginal;
         $documento->path = 'uploads/' . $nomeArquivo;
         $documento->size = filesize('uploads/' . $nomeArquivo);
         $documento->id_user = Auth::user()->id;
         $documento->save();
 
-        return redirect()->route('documents')->with('success', 'Documento enviado com sucesso!');
+        $permissions = new Permissions;
+        $permissions->edit = true;
+        $permissions->delete = true;
+
+        return redirect()->route('documents.index')->with('success', 'Documento enviado com sucesso!');
     }
 
     public function edit($id)
@@ -66,10 +74,10 @@ class DocumentController extends Controller
     public function download($id) 
     {
         $document = Documents::findOrFail($id);
-
+        $nomeOriginal = $document->name;
         $caminhoArquivo = $document->path;
         $caminhoArquivoFinal = str_replace("/","\\",$caminhoArquivo);
-        return response()->download("C:\Users\camin\Desktop\laravel\laraveldsi\public\\" . $caminhoArquivoFinal);
+        return response()->download("C:\Users\camin\Desktop\laravel\laraveldsi\public\\" . $caminhoArquivoFinal, $nomeOriginal);
     }
 
     public function update(Request $request, $id)
@@ -89,6 +97,6 @@ class DocumentController extends Controller
         $documento = Documents::findOrFail($id);
         $documento->delete();
 
-        return redirect()->route('documents')->with('success', 'Documento excluído com sucesso!');
+        return redirect()->route('documents.index')->with('success', 'Documento excluído com sucesso!');
     }
 }

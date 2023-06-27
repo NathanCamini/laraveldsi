@@ -19,13 +19,12 @@
                                 <x-text-input class="mt-1 block w-full" type="text" name="name" id="name" value="{{ request('name') }}" />
                             </div>
                             <div class="mt-4">
-                                <x-input-label for="created_at">Data:</x-input-label>
+                                <x-input-label for="created_at">Data de criação:</x-input-label>
                                 <x-text-input class="mt-1 block w-full" type="date" name="created_at" id="created_at" value="{{ request('created_at') }}" />
                             </div>
                             <div class="mt-4">
                                 <x-input-label for="id_user">Usúario Criador:</x-input-label>
                                 <select name="id_user" id="id_user" class="mt-1 block w-full">
-                                    <option> Todos </option>
                                     @foreach ($users as $user)
                                     <option value="{{ $user->id }}"> {{ $user->name }}</option>
                                     @endforeach
@@ -44,18 +43,32 @@
                                 <th class="bg-gray-600 p-2 text-white font-bold md:border md:border-grey-500 text-left block md:table-cell">Nome do Documento</th>
                                 <th class="bg-gray-600 p-2 text-white font-bold md:border md:border-grey-500 text-left block md:table-cell">Criação</th>
                                 <th class="bg-gray-600 p-2 text-white font-bold md:border md:border-grey-500 text-left block md:table-cell">Última edição</th>
+                                <th class="bg-gray-600 p-2 text-white font-bold md:border md:border-grey-500 text-left block md:table-cell">Criador</th>
                                 <th class="bg-gray-600 p-2 text-white font-bold md:border md:border-grey-500 text-left block md:table-cell">Editar</th>
                                 <th class="bg-gray-600 p-2 text-white font-bold md:border md:border-grey-500 text-left block md:table-cell">Excluir</th>
                                 <th class="bg-gray-600 p-2 text-white font-bold md:border md:border-grey-500 text-left block md:table-cell">Download</th>
+                                @foreach ($documents as $document)
+
+                                @foreach ($users as $user)
+                                @if($user->id === $document->id_user && $userAtual === $user->id)
+                                <th class="bg-gray-600 p-2 text-white font-bold md:border md:border-grey-500 text-left block md:table-cell">Permissões</th>
+                                @endif
+                                @endforeach
+                                @endforeach
                             </tr>
                         </thead>
                         <tbody class="block md:table-row-group">
                             @foreach ($documents as $document)
-
                             <tr class="bg-gray-300 border border-grey-500 md:border-none block md:table-row">
                                 <td class="p-2 md:border md:border-grey-500 text-left block md:table-cell">{{ $document->name }}</td>
                                 <td class="p-2 md:border md:border-grey-500 text-left block md:table-cell">{{ date( 'd/m/Y' , strtotime($document->created_at))}}</td>
                                 <td class="p-2 md:border md:border-grey-500 text-left block md:table-cell">{{ date( 'd/m/Y H:i:s' , strtotime($document->updated_at))}}</td>
+                                @foreach ($users as $user)
+                                @if($user->id === $document->id_user)
+                                <td class="p-2 md:border md:border-grey-500 text-left block md:table-cell">{{ $user->name }}</td>
+                                @endif
+                                @endforeach
+
                                 <td class="p-2 md:border md:border-grey-500 text-left md:table-cell flex flex-row">
                                     <a href="{{ route('documents.edit', $document->id) }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 border border-blue-500 rounded">
                                         Editar
@@ -73,6 +86,15 @@
                                         Download
                                     </a>
                                 </td>
+                                @foreach ($users as $user)
+                                @if($user->id === $document->id_user && $userAtual === $user->id)
+                                <td class="p-2 md:border md:border-grey-500 text-left md:table-cell flex flex-row">
+                                    <a href="{{ route('permission.edit', $document->id) }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 border border-blue-500 rounded">
+                                        Editar Permissões(futuro)
+                                    </a>
+                                </td>
+                                @endif
+                                @endforeach
                             </tr>
                             @endforeach
                         </tbody>
